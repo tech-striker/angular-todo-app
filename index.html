@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html ng-app="ToDo">
+<head>
+	<title>AngularJS - TO Do List</title>
+
+	<!-- scripts links -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+  	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+  	<!-- css links -->
+    <link rel="stylesheet" type="text/css" href="css/todo.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+</head>
+<body ng-controller="ToDoController">
+
+<div class="container">
+
+<h3>AngularJS To-DO List</h3>
+<form>
+	<div class="form-group col-xs-6">
+		<input type="text" class="col-md-6 form-control input-lg" name="newTask" ng-model="newTask" />
+	</div>
+	<div class="form-group col-xs-6">
+		<button class="add-btn btn btn-primary btn-lg" ng-click="addTask();">Add to list</button>
+	</div>
+</form>
+<hr />
+
+<table class="table table-condensed">
+	<tr>
+		<th colspan="3"><button class="mdelete-btn btn btn-danger pull-right" ng-click="deleteTasks(ids);">Delete Selected</button></th>
+	</tr>
+	<tr>
+		<th>Select</th>
+		<th>Task</th>
+		<th>Delete</th>
+	</tr>
+	<tr ng-repeat="task in tasks">
+		<td><input type="checkbox" ng-model="active" ng-change="change(task.id, active)" /></td>
+		<td><span class="done-{{checkbox.value1}}">{{task.taskName}}</span></td>
+		<td><button class="btn btn-danger" ng-click="deleteTask(task.id)">Delete</button></td>
+	</tr>
+</table>
+</div>
+
+
+<script type="text/javascript">
+	
+var app = angular.module('ToDo', []); 
+
+app.controller('ToDoController', function($scope, $http) {
+	
+	getTask();
+
+	function getTask() {
+		$http.get('ajax/getTask.php').success(function(data) {
+			$scope.tasks = data;
+		});
+	}
+
+	$scope.addTask = function (task) {
+		$http.post("ajax/addTask.php?task="+$scope.newTask).success(function(data) {
+		    getTask();
+		});
+	};
+
+	$scope.deleteTask = function(id) {
+		console.log('deleteTask(' + id + ')');
+		$http.post("ajax/deleteTask.php?taskID="+id).success(function() {
+		    getTask();
+		});
+	};
+
+	$scope.ids = [];
+	$scope.change = function(id, active) {
+        if (active)
+            $scope.ids.push(id);
+        else
+            $scope.ids.splice($scope.ids.indexOf(id), 1);
+	};
+
+	$scope.deleteTasks = function(ids) {
+		$http.post("ajax/deleteTask.php?taskID="+ids).success(function() {
+			$scope.ids = [];
+		    getTask();
+		});
+	};
+
+});// closed controller.
+
+</script>
+
+</body>
+</html>
